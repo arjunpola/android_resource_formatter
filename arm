@@ -4,17 +4,19 @@ set -e
 if [ \( $# = 2 -a -f $1 -a -d $2 \) ]
 then
    fname=`basename $1 | cut -f 1 -d '.'` 
-   res=`unzip $1 -d /tmp/`
-   for file in /tmp/$fname/*; do
-       bfile=`basename $file`
-       re="(.*)_([^_]*)\.(.*)"
+   unzipDir=$(unzip $1 -d /tmp/ | grep -m1 'creating:' | cut -d' ' -f5-)
+   unzipDir=${unzipDir%/*}
+   for file in "$unzipDir"/* ; do
+       #echo $file
+       bfile=${file##*/}
+       re="([^.]*)_([^_]*)\.(.*)"
        if [[ $bfile =~ $re ]]; then
            fileName="${BASH_REMATCH[1]}.${BASH_REMATCH[3]}"
            dpi_folder="drawable-${BASH_REMATCH[2]}";
            dpi_path="$2/src/main/res/$dpi_folder"
-           echo $dpi_path
-           echo $fileName
-           mv $file "$dpi_path/$fileName"
+           #echo $dpi_path
+           #echo $fileName
+           mv "$file" "$dpi_path/$fileName"
        fi
    done
 fi
